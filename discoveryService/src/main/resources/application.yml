@@ -1,0 +1,11 @@
+server:
+  port: 8761 # 0 으로 설정하면 실행될 때 랜덤으로 포트가 부여된다
+
+spring:
+  application:
+    name: discoveryService
+
+eureka:
+  client:
+    register-with-eureka: false # 현제 app을 Eureka client로 등록은 하지 않는 옵션
+    fetch-registry: false # 위와 동일

@@ -1,0 +1,43 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: first-service
+          uri: lb://FIRST-SERVICE # Eureka 대시보드에 나오는 Application 이름으로 LoadBalancer 설정
+          predicates: # 조건에 부합해야 uri로 이동
+            - Path=/first-service/**
+          filters: # 다양한 Filter Factories : https://docs.spring.io/spring-cloud-gateway/docs/3.1.3/reference/html/#gatewayfilter-factories
+            - AddRequestHeader=first-request, first-request-header2
+            - AddResponseHeader=first-response, first-response-header2
+            - name: CustomFilter # CustomFilter 등록
+            - name: LoggingFilter
+              args: # Config 객체에 바인딩
+                baseMessage: Logging Filter
+                preLogger: true
+                postLogger: true
+        - id: second-service
+          uri: lb://SECOND-SERVICE
+          predicates:
+            - Path=/second-service/**
+          filters:
+            - AddRequestHeader=second-request, second-request-header2
+            - AddResponseHeader=second-response, second-response-header2
+            - CustomFilter
+      default-filters: # Global pre Filter는 가장 처음 실행되며, post Filter는 가장 마지막에 실행
+        - name: CustomGlobalFilterV2
+          args: # Config 객체에 바인딩
+            baseMessage: Spring Cloud Gateway Global Filter
+            preLogger: true
+            postLogger: true
